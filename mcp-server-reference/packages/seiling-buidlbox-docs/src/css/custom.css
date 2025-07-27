@@ -1,0 +1,12 @@
+/**
+ * Main CSS entry point for Seiling Buidlbox documentation
+ * 
+ * This file imports all modular CSS files for better maintainability.
+ * The classic template bundles Infima by default. Infima is a CSS framework 
+ * designed to work well for content-focused websites.
+ */
+
+/* Import modular CSS files */
+@import './variables.css';
+@import './base.css';
+@import './components.css'; 

@@ -1,0 +1,852 @@
+{
+  "name": "n8n Sei Agent Example",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "37e45c11-555f-4416-a012-005524d6cfc8",
+      "name": "When chat message received",
+      "webhookId": "a042eaac-f3dc-47d5-a0e6-89a675f634d2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "5ce03b54-5fee-4563-8fc7-53b5105f0456",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:7b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        140,
+        220
+      ],
+      "id": "d90c3936-9cd8-44d4-b7a6-f6a637c23686",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "81DawOTtZeTJDrjl",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to transfer SEI to an address",
+        "workflowId": {
+          "__rl": true,
+          "value": "LtsDY9YF09PHjCH9",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Amount": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Amount', ``, 'number') }}",
+            "Address": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Address', ``, 'string') }}",
+            "Transaction Type": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Transaction_Type', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "Transaction Type",
+              "displayName": "Transaction Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        220
+      ],
+      "id": "fdae13e1-2420-4ce7-b9c8-206d106d6b4b",
+      "name": "Call n8n Workflow Tool"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "Address"
+            },
+            {
+              "name": "Amount",
+              "type": "number"
+            },
+            {
+              "name": "Transaction Type"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        300
+      ],
+      "id": "b675f3d7-bbed-45c4-bca0-da2e2592f224",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "chain": "={{ $('Set Tx Config').item.json.Network }}",
+        "recipient": "={{ $json.recipient }}",
+        "value": "={{ $json.value }}",
+        "nonce": "={{ $json.nonce }}",
+        "calldata": "={{ $json.data }}"
+      },
+      "type": "n8n-nodes-sei.seiTxExecutor",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        220
+      ],
+      "id": "e945bbbf-5d90-41d2-b3d9-9e5d022e8e66",
+      "name": "Execute Transfer Tx",
+      "credentials": {
+        "seiApi": {
+          "id": "hNdMWun6VJrH1xsu",
+          "name": "Sei account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chain": "={{ $('Set Tx Config').item.json.Network }}",
+        "recipient": "={{ $('Set Tx Config').item.json[\"Recipient Address\"] }}",
+        "value": "={{ $('Set Tx Config').item.json.Value }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-sei.seiTxBuilder",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        260
+      ],
+      "id": "ce200499-483b-4c0b-90bf-4dce3436784d",
+      "name": "Build Transfer Tx",
+      "credentials": {
+        "seiApi": {
+          "id": "hNdMWun6VJrH1xsu",
+          "name": "Sei account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4683aac4-7fb4-43ef-9e1f-d10eb2a1e946",
+              "leftValue": "={{ $json.network }}",
+              "rightValue": "testnet",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1380,
+        300
+      ],
+      "id": "cd518306-e25e-4fed-8132-19f74d514f2a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d4176429-6260-43f9-9d93-84d5cf22415b",
+              "name": "network",
+              "value": "testnet",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1160,
+        300
+      ],
+      "id": "28515270-a8cd-4117-87e6-e6f083600170",
+      "name": "Set Network"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1002650a-76e7-4afb-866f-b84326f09aba",
+              "name": "Transaction Type",
+              "value": "All",
+              "type": "string"
+            },
+            {
+              "id": "d90cd052-bd6c-4dc8-90d5-78d08942ea66",
+              "name": "Recipient Address",
+              "value": "={{ $json.Address }}",
+              "type": "string"
+            },
+            {
+              "id": "2ae8c736-ff27-4c93-bd7b-052a8d76d931",
+              "name": "Value",
+              "value": "={{ $json.Amount }}",
+              "type": "number"
+            },
+            {
+              "id": "4c512035-10a1-4ec3-aa62-5302be355c5c",
+              "name": "Sender Address",
+              "value": "0xf133FF0166A89aD9ab691a58385CDBd3590C7f28",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        940,
+        300
+      ],
+      "id": "421c0f52-1dc4-4ffb-862c-84ffc7ced8ff",
+      "name": "Set Tx Data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "02d3deec-48e4-41c7-8ffc-939c2fdb966c",
+              "name": "Custom RPC",
+              "value": "https://evm-rpc-testnet.sei-apis.com",
+              "type": "string"
+            },
+            {
+              "id": "11be5527-4c6c-44a1-8eef-7879ec7eaf48",
+              "name": "Explorer URL",
+              "value": "https://evm-rpc-testnet.sei-apis.com",
+              "type": "string"
+            },
+            {
+              "id": "a031b7be-9aad-44ea-9520-a1534d03430d",
+              "name": "Network",
+              "value": "sei-testnet",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1600,
+        200
+      ],
+      "id": "a3140675-aec4-4c6f-bf93-7b185858ed0a",
+      "name": "Set Testnet Config"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "02d3deec-48e4-41c7-8ffc-939c2fdb966c",
+              "name": "Custom RPC",
+              "value": "https://evm-rpc.sei-apis.com",
+              "type": "string"
+            },
+            {
+              "id": "ff44b7cb-1c61-46ca-a881-bd71a9814423",
+              "name": "Explorer URL",
+              "value": "https://evm-rpc.sei-apis.com",
+              "type": "string"
+            },
+            {
+              "id": "c71203ba-0e3a-4c03-8f78-49a9d38df4f4",
+              "name": "Network",
+              "value": "sei-mainnet",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1600,
+        400
+      ],
+      "id": "5e329eb4-aca0-4b5c-8b76-995855a02c00",
+      "name": "Set Mainnet Config"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a256237b-e13c-49c1-a312-456bbfef6f07",
+              "name": "Custom RPC",
+              "value": "={{ $json['Custom RPC'] }}",
+              "type": "string"
+            },
+            {
+              "id": "472333bb-e941-40f5-8636-e51f9b63a212",
+              "name": "Explorer URL",
+              "value": "={{ $json['Explorer URL'] }}",
+              "type": "string"
+            },
+            {
+              "id": "04fac572-93a5-42cc-aecb-7a84ec77757e",
+              "name": "Recipient Address",
+              "value": "={{ $('Set Tx Data').item.json['Recipient Address'] }}",
+              "type": "string"
+            },
+            {
+              "id": "624530a7-8d19-4b98-ae65-4f1f972fe364",
+              "name": "Value",
+              "value": "={{ $('Set Tx Data').item.json.Value }}",
+              "type": "number"
+            },
+            {
+              "id": "66bd0b99-4e69-44da-a7e6-026fae26728d",
+              "name": "Sender Address",
+              "value": "={{ $('Set Tx Data').item.json['Sender Address'] }}",
+              "type": "string"
+            },
+            {
+              "id": "2c929486-770b-41b3-a4ac-96e719d30486",
+              "name": "Transaction Type",
+              "value": "={{ $('Set Tx Data').item.json['Transaction Type'] }}",
+              "type": "string"
+            },
+            {
+              "id": "d7ec2523-5479-4f5a-a6af-beefa6e47424",
+              "name": "Network",
+              "value": "={{ $json.Network }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1820,
+        300
+      ],
+      "id": "56b76ad6-f34e-48f0-84c0-668c32f9d8c9",
+      "name": "Set Tx Config"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['Transaction Type'] }}",
+                    "rightValue": "Deploy NFT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "c6d6c1d3-54a4-4db0-8ab8-6ec1c03d61ae"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Deploy NFT"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a6467d23-0e6d-49c1-9507-f8d2d7a65fb9",
+                    "leftValue": "={{ $json['Transaction Type'] }}",
+                    "rightValue": "Deploy Token",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Deploy Token"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b37f8f87-5f67-4932-9697-c41e8c9e89f8",
+                    "leftValue": "={{ $json['Transaction Type'] }}",
+                    "rightValue": "Transfer SEI",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Transfer SEI"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "86558865-0b07-485d-8c58-8e56f804e0ae",
+                    "leftValue": "={{ $json['Transaction Type'] }}",
+                    "rightValue": "Transfer Token",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Transfer Token"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c5415390-5a46-4679-b84e-26fbbfe7c259",
+                    "leftValue": "={{ $json['Transaction Type'] }}",
+                    "rightValue": "Deploy Contract",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Deploy Contract"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7f56d8ff-07e2-48ff-afd8-3d5b7b269857",
+                    "leftValue": "={{ $json['Transaction Type'] }}",
+                    "rightValue": "Get Info",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Get Info"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5a41c114-82cf-4892-816b-25cb9b215492",
+                    "leftValue": "={{ $json['Transaction Type'] }}",
+                    "rightValue": "All",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "All"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2040,
+        220
+      ],
+      "id": "274d62dc-b678-40e8-b4f2-1042e6b57b73",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "content": "## Set Mainnet/Testnet",
+        "height": 80,
+        "width": 260,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        240
+      ],
+      "id": "6b4fdc1e-2620-4837-a24b-5ace37050962",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## Set Tx Data",
+        "height": 80,
+        "width": 160,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        240
+      ],
+      "id": "b9f85139-f817-4eed-bd26-709b51eddef9",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8b72ee2a-ccd2-422d-aa2e-f080ba8f9bec",
+              "name": "success",
+              "value": "={{ $json.success }}",
+              "type": "boolean"
+            },
+            {
+              "id": "5be08150-6604-4f1b-b973-8b0ffad70cf7",
+              "name": "transactionHash",
+              "value": "={{ $json.transactionHash }}",
+              "type": "string"
+            },
+            {
+              "id": "39bdb3d6-07aa-4d55-be30-ea5de3c76c54",
+              "name": "receipt",
+              "value": "={{ $json.receipt }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2780,
+        220
+      ],
+      "id": "b93b5fc5-5da2-4680-b52d-ceb2db91f3fe",
+      "name": "Respond"
+    }
+  ],
+  "pinData": {
+    "When chat message received": [
+      {
+        "json": {
+          "sessionId": "562f6a4e918a4e6db796c4ec278286a7",
+          "action": "sendMessage",
+          "chatInput": "Transfer 0,1 SEI to this address 0xF12d64817029755853bc74a585EcD162f63c5f84"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call n8n Workflow Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Transfer Tx": {
+      "main": [
+        [
+          {
+            "node": "Execute Transfer Tx",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Set Testnet Config",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Mainnet Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Network": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Tx Data": {
+      "main": [
+        [
+          {
+            "node": "Set Network",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Testnet Config": {
+      "main": [
+        [
+          {
+            "node": "Set Tx Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Mainnet Config": {
+      "main": [
+        [
+          {
+            "node": "Set Tx Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Tx Config": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Set Tx Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [],
+        [],
+        [
+          {
+            "node": "Build Transfer Tx",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [],
+        [],
+        [
+          {
+            "node": "Build Transfer Tx",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Transfer Tx": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cb9674e5-ba10-4004-8ec3-8f06b01360c3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "104ddc28507c665796d74dcc0d71720650ea1c6d0ed6c7459e5072da0338e12f"
+  },
+  "id": "LtsDY9YF09PHjCH9",
+  "tags": []
+}

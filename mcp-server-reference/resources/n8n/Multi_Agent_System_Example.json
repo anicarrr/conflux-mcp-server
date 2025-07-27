@@ -1,0 +1,286 @@
+{
+  "name": "Multi Agent System Example",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "a34cce78-31c2-474e-b88b-93ee2fabf276",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -120,
+        -40
+      ],
+      "id": "0c838ac0-1a0c-44f9-9c67-b48a22ac2fdd",
+      "name": "Webhook",
+      "webhookId": "a34cce78-31c2-474e-b88b-93ee2fabf276"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.chatInput }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        312,
+        -40
+      ],
+      "id": "ece918c5-f1e6-414c-ada0-62b96c87296b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        900,
+        -40
+      ],
+      "id": "bd5d4f6d-f7da-41db-aa3c-e71bbd33dbd2",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Message The Eliza Agent for fetching wallet balance and transfering SEI. Use it with natural language with commands such as:\n\"What's your wallet address?\"\n\"What's my wallet address and balance?\"\n\"Transfer 0.0123 Sei to 0xF12d64817029755853bc74a585EcD162f63c5f84\"",
+        "method": "POST",
+        "url": "http://seiling-n8n:5678/webhook/92a6b722-441c-4955-b9e4-7e02b5d3af85",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        340,
+        180
+      ],
+      "id": "3f0f5013-a0df-4c3d-9874-846f056557e5",
+      "name": "Eliza Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        180
+      ],
+      "id": "600c3f73-9e50-4ce5-b2cd-e314e7ec2d31",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "R35cXfX48phqiM1N",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        180
+      ],
+      "id": "e4001cd3-b884-4372-b362-5d8646ff8ea7",
+      "name": "Cambrian Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        180
+      ],
+      "id": "eb531160-eeb1-4117-b8a0-f2cb10b46621",
+      "name": "Custom MCP Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        180
+      ],
+      "id": "f56b7e90-8b7f-4392-a792-f9bec0f8dfe5",
+      "name": "Sei MCP Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        220,
+        180
+      ],
+      "id": "013ecc8e-f632-4b07-87db-d5ce4fdb0cf6",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "txOiJJG7UpaLsPSW",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "seiling-n8n:5678",
+            "user-agent": "python-requests/2.32.4",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept": "*/*",
+            "connection": "keep-alive",
+            "authorization": "Bearer ...",
+            "content-type": "application/json",
+            "content-length": "121"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "sessionId": "84ea3797-fd3d-48a8-ab2b-b75ccc2d45f0",
+            "chatInput": "ask eliza agent about my wallet address and balance"
+          },
+          "webhookUrl": "http://localhost:5678/webhook/a34cce78-31c2-474e-b88b-93ee2fabf276",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eliza Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cambrian Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Custom MCP Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sei MCP Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "b638c07f-0369-4d81-abbc-217a3c500d86",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e635ce1c13475bb02be3d807f52c2d696f1566c29cf7b6c474f64889cb8fe01a"
+  },
+  "id": "nbuE5KNBNT8DmH46",
+  "tags": []
+}

@@ -1,0 +1,367 @@
+{
+  "name": "Sei MCP Demo",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -780,
+        720
+      ],
+      "id": "d6576447-737e-48c1-9e11-31a6d38b8d3c",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "connectionType": "http"
+      },
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        720
+      ],
+      "id": "4b3e483d-51a3-4082-884d-a2629655ef53",
+      "name": "List Tools",
+      "credentials": {
+        "mcpClientHttpApi": {
+          "id": "d3M94l0qirvCx9w7",
+          "name": "MCP Client HTTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "connectionType": "http",
+        "operation": "executeTool",
+        "toolName": "=get_chain_info",
+        "toolParameters": "{\n  \"network\": \"sei-testnet\"\n}"
+      },
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        220
+      ],
+      "id": "7d8dd220-dcae-408b-b0b1-a1e89aca2e39",
+      "name": "Get Chain Info",
+      "credentials": {
+        "mcpClientHttpApi": {
+          "id": "d3M94l0qirvCx9w7",
+          "name": "MCP Client HTTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "connectionType": "http",
+        "operation": "executeTool",
+        "toolName": "=get_supported_networks",
+        "toolParameters": "{\n}"
+      },
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        420
+      ],
+      "id": "8aa99da3-fc3d-431f-8b7f-9b621322a11d",
+      "name": "Get Supported Networks",
+      "credentials": {
+        "mcpClientHttpApi": {
+          "id": "d3M94l0qirvCx9w7",
+          "name": "MCP Client HTTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "connectionType": "http",
+        "operation": "executeTool",
+        "toolName": "=get_latest_block",
+        "toolParameters": "={\n  \"network\": \"{{ $('Config').item.json.network }}\"\n} "
+      },
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        620
+      ],
+      "id": "fd118079-5be4-4300-94d3-f0bfdfeb760d",
+      "name": "Get Latest Block",
+      "credentials": {
+        "mcpClientHttpApi": {
+          "id": "d3M94l0qirvCx9w7",
+          "name": "MCP Client HTTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "093fcc40-822f-4c49-9903-8c60be164fb0",
+              "name": "network",
+              "value": "sei-testnet",
+              "type": "string"
+            },
+            {
+              "id": "f68513c2-45a3-4dcf-bcf3-d02c104e787f",
+              "name": "address",
+              "value": "0xF12d64817029755853bc74a585EcD162f63c5f84",
+              "type": "string"
+            },
+            {
+              "id": "30472f60-0246-420f-802a-eccec81e7bf2",
+              "name": "token_contract_address",
+              "value": "0x07502bfDF9f79795aF467c9bF7EDFd4CFe3e28a4",
+              "type": "string"
+            },
+            {
+              "id": "af6ab668-d452-4127-b3c1-b367f2d6f5db",
+              "name": "amount",
+              "value": "0.012345",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -560,
+        720
+      ],
+      "id": "db620deb-3466-40c7-80c4-873b26b678da",
+      "name": "Config"
+    },
+    {
+      "parameters": {
+        "connectionType": "http",
+        "operation": "executeTool",
+        "toolName": "=get_block_by_number",
+        "toolParameters": "={\n  \"blockNumber\": {{ JSON.parse($json.result.content[0].text).number }},\n  \"network\": \"sei-testnet\"\n} "
+      },
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        100,
+        620
+      ],
+      "id": "b46746a7-080e-48e9-a379-7395189a5d06",
+      "name": "Get Block By Number",
+      "credentials": {
+        "mcpClientHttpApi": {
+          "id": "d3M94l0qirvCx9w7",
+          "name": "MCP Client HTTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "connectionType": "http",
+        "operation": "executeTool",
+        "toolName": "=get_balance",
+        "toolParameters": "={\n  \"address\": \"{{ $('Config').item.json.address }}\",\n  \"network\": \"{{ $('Config').item.json.network }}\"\n} "
+      },
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        820
+      ],
+      "id": "4fc84238-de9f-4ac1-8c72-72f7f78177d4",
+      "name": "Get Balance",
+      "credentials": {
+        "mcpClientHttpApi": {
+          "id": "d3M94l0qirvCx9w7",
+          "name": "MCP Client HTTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "connectionType": "http",
+        "operation": "executeTool",
+        "toolName": "=get_erc20_balance",
+        "toolParameters": "={\n  \"address\": \"{{ $('Config').item.json.address }}\",  \n  \"tokenAddress\": \"{{ $('Config').item.json.token_contract_address }}\",\n  \"network\": \"{{ $('Config').item.json.network }}\"\n} "
+      },
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        1020
+      ],
+      "id": "0a9a2955-ee3e-4d1e-ac48-40d7d01bb848",
+      "name": "Get ERC20 Balance",
+      "credentials": {
+        "mcpClientHttpApi": {
+          "id": "d3M94l0qirvCx9w7",
+          "name": "MCP Client HTTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "connectionType": "http",
+        "operation": "executeTool",
+        "toolName": "=get_address_from_private_key",
+        "toolParameters": "={\n} "
+      },
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        1220
+      ],
+      "id": "c002c947-57de-4004-bf69-51a5ceb1677f",
+      "name": "Get Address",
+      "credentials": {
+        "mcpClientHttpApi": {
+          "id": "d3M94l0qirvCx9w7",
+          "name": "MCP Client HTTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "connectionType": "http",
+        "operation": "executeTool",
+        "toolName": "=transfer_erc20",
+        "toolParameters": "={ \n  \"tokenAddress\": \"{{ $('Config').item.json.token_contract_address }}\",\n  \"toAddress\": \"{{ $('Config').item.json.address }}\", \n  \"amount\": \"{{ $('Config').item.json.amount }}\", \n  \"network\": \"{{ $('Config').item.json.network }}\"\n} "
+      },
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        1420
+      ],
+      "id": "c6310f68-18e3-4a85-b872-8c5d6a923da9",
+      "name": "Transfer Token",
+      "credentials": {
+        "mcpClientHttpApi": {
+          "id": "d3M94l0qirvCx9w7",
+          "name": "MCP Client HTTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "connectionType": "http",
+        "operation": "executeTool",
+        "toolName": "=transfer_sei",
+        "toolParameters": "={ \n  \"to\": \"{{ $('Config').item.json.address }}\", \n  \"amount\": \"{{ $('Config').item.json.amount }}\", \n  \"network\": \"{{ $('Config').item.json.network }}\"\n} "
+      },
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        1620
+      ],
+      "id": "5684d8c2-98a3-4c74-89b4-a92e84e043b7",
+      "name": "Transfer Sei",
+      "credentials": {
+        "mcpClientHttpApi": {
+          "id": "d3M94l0qirvCx9w7",
+          "name": "MCP Client HTTP"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Tools": {
+      "main": [
+        [
+          {
+            "node": "Get Chain Info",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Supported Networks",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Latest Block",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Balance",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get ERC20 Balance",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Address",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Transfer Token",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Transfer Sei",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "List Tools",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Latest Block": {
+      "main": [
+        [
+          {
+            "node": "Get Block By Number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a9af124c-eb7b-4f5e-985c-d1038758f4a8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e635ce1c13475bb02be3d807f52c2d696f1566c29cf7b6c474f64889cb8fe01a"
+  },
+  "id": "EIVM3gqhlQSHUSF2",
+  "tags": []
+}

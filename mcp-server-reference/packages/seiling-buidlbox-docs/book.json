@@ -1,0 +1,42 @@
+{
+  "title": "Seiling Buidlbox Documentation",
+  "description": "Complete documentation for Seiling Buidlbox AI agent development toolkit",
+  "author": "Seiling Buidlbox Team",
+  "language": "en",
+  "structure": {
+    "readme": "README.md",
+    "summary": "SUMMARY.md"
+  },
+  "plugins": [
+    "expandable-chapters",
+    "search",
+    "github",
+    "theme-default",
+    "highlight",
+    "sharing",
+    "fontsettings"
+  ],
+  "pluginsConfig": {
+    "github": {
+      "url": "https://github.com/your-username/seiling-buidlbox"
+    },
+    "sharing": {
+      "facebook": true,
+      "twitter": true,
+      "google": false,
+      "weibo": false,
+      "instapaper": false,
+      "vk": false,
+      "all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+    },
+    "fontsettings": {
+      "theme": "white",
+      "family": "sans",
+      "size": 2
+    }
+  },
+  "variables": {
+    "projectName": "Seiling Buidlbox",
+    "projectVersion": "1.0.0"
+  }
+} 

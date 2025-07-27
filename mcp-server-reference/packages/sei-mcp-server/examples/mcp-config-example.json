@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "sei-mcp-server": {
+      "url": "http://localhost:3002/sse",
+      "headers": {
+        "X-Private-Key": "your_private_key_here"
+      }
+    }
+  }
+} 
