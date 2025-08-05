@@ -1,8 +1,0 @@
-src/
-tsconfig.json
-jest.config.js
-eslint.config.js
-commintlint.config.js
-.prettierrc
-.prettierignore
-.husky/

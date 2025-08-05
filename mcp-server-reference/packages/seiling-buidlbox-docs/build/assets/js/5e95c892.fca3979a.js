@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkseiling_buidlbox_docs=self.webpackChunkseiling_buidlbox_docs||[]).push([[647],{7121:(e,s,r)=>{r.r(s),r.d(s,{default:()=>a});r(6540);var u=r(4164),c=r(5500),i=r(7559),l=r(2831),d=r(1656),n=r(4848);function a(e){return(0,n.jsx)(c.e3,{className:(0,u.A)(i.G.wrapper.docsPages),children:(0,n.jsx)(d.A,{children:(0,l.v)(e.route.routes)})})}}}]);

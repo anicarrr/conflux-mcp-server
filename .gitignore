@@ -239,4 +239,4 @@ docs/.buildinfo
 *.heapprofile
 *.cpuprofile
 
-./mcp-server-reference
+mcp-server-reference/
