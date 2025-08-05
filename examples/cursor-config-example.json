@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "conflux-mcp-server": {
+      "command": "node",
+      "args": ["./build/index.js"],
+      "cwd": "/path/to/conflux-mcp-server",
+      "env": {
+        "NODE_ENV": "development",
+        "LOG_LEVEL": "debug"
+      }
+    }
+  },
+  "notes": {
+    "setup": "1. Run 'bun install && bun run build' to build the project",
+    "cwd": "Replace '/path/to/conflux-mcp-server' with your actual project path",
+    "private_key": "Add your Conflux private key to the env section if needed",
+    "networks": "Supports conflux and conflux-testnet networks",
+    "usage": "Copy this to .cursor-config.json in your project root"
+  }
+} 
