@@ -112,11 +112,12 @@ const erc1155TransferAbi = [
 export async function transferConflux(
   toAddress: string,
   amount: string, // in ether
-  network = DEFAULT_NETWORK
+  network = DEFAULT_NETWORK,
+  privateKeyOverride?: Hex
 ): Promise<Hash> {
   const validatedToAddress = services.helpers.validateAddress(toAddress);
   // Get private key from environment
-  const privateKey = getPrivateKeyAsHex();
+  const privateKey = privateKeyOverride ?? getPrivateKeyAsHex();
 
   if (!privateKey) {
     throw new Error('Private key not available. Set the PRIVATE_KEY environment variable and restart the MCP server.');
@@ -146,7 +147,8 @@ export async function transferERC20(
   tokenAddress: string,
   toAddress: string,
   amount: string,
-  network: string = 'conflux'
+  network: string = 'conflux',
+  privateKeyOverride?: Hex
 ): Promise<{
   txHash: Hash;
   amount: {
@@ -162,7 +164,7 @@ export async function transferERC20(
   const validatedToAddress = services.helpers.validateAddress(toAddress);
 
   // Get private key from environment
-  const privateKey = getPrivateKeyAsHex();
+  const privateKey = privateKeyOverride ?? getPrivateKeyAsHex();
 
   if (!privateKey) {
     throw new Error('Private key not available. Set the PRIVATE_KEY environment variable and restart the MCP server.');
@@ -221,7 +223,8 @@ export async function approveERC20(
   tokenAddress: string,
   spenderAddress: string,
   amount: string,
-  network: string = 'conflux'
+  network: string = 'conflux',
+  privateKeyOverride?: Hex
 ): Promise<{
   txHash: Hash;
   amount: {
@@ -237,7 +240,7 @@ export async function approveERC20(
   const validatedSpenderAddress = services.helpers.validateAddress(spenderAddress);
 
   // Get private key from environment
-  const privateKey = getPrivateKeyAsHex();
+  const privateKey = privateKeyOverride ?? getPrivateKeyAsHex();
 
   if (!privateKey) {
     throw new Error('Private key not available. Set the PRIVATE_KEY environment variable and restart the MCP server.');
@@ -296,7 +299,8 @@ export async function transferERC721(
   tokenAddress: string,
   toAddress: string,
   tokenId: bigint,
-  network: string = 'conflux'
+  network: string = 'conflux',
+  privateKeyOverride?: Hex
 ): Promise<{
   txHash: Hash;
   tokenId: string;
@@ -309,7 +313,7 @@ export async function transferERC721(
   const validatedToAddress = services.helpers.validateAddress(toAddress);
 
   // Get private key from environment
-  const privateKey = getPrivateKeyAsHex();
+  const privateKey = privateKeyOverride ?? getPrivateKeyAsHex();
 
   if (!privateKey) {
     throw new Error('Private key not available. Set the PRIVATE_KEY environment variable and restart the MCP server.');
@@ -376,7 +380,8 @@ export async function transferERC1155(
   toAddress: string,
   tokenId: bigint,
   amount: string,
-  network: string = 'conflux'
+  network: string = 'conflux',
+  privateKeyOverride?: Hex
 ): Promise<{
   txHash: Hash;
   tokenId: string;
@@ -386,7 +391,7 @@ export async function transferERC1155(
   const validatedToAddress = services.helpers.validateAddress(toAddress);
 
   // Get private key from environment
-  const privateKey = getPrivateKeyAsHex();
+  const privateKey = privateKeyOverride ?? getPrivateKeyAsHex();
 
   if (!privateKey) {
     throw new Error('Private key not available. Set the PRIVATE_KEY environment variable and restart the MCP server.');

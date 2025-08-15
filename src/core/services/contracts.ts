@@ -27,10 +27,11 @@ export async function readContract(params: ReadContractParameters, network = DEF
  */
 export async function writeContract(
   params: Record<string, any>,
-  network = DEFAULT_NETWORK
+  network = DEFAULT_NETWORK,
+  privateKeyOverride?: Hex
 ): Promise<Hash> {
   // Get private key from environment
-  const key = getPrivateKeyAsHex();
+  const key = privateKeyOverride ?? getPrivateKeyAsHex();
 
   if (!key) {
     throw new Error('Private key not available. Set the PRIVATE_KEY environment variable and restart the MCP server.');

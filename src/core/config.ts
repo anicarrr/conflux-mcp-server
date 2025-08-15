@@ -1,6 +1,6 @@
-import dotenv from 'dotenv';
-import { z } from 'zod';
-import { type Hex } from 'viem';
+import dotenv from "dotenv";
+import { z } from "zod";
+import { type Hex } from "viem";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -18,7 +18,7 @@ const formatPrivateKey = (key?: string): string | undefined => {
   if (!key) return undefined;
 
   // Ensure the private key has 0x prefix
-  return key.startsWith('0x') ? key : `0x${key}`;
+  return key.startsWith("0x") ? key : `0x${key}`;
 };
 
 // Runtime configuration that can be updated
@@ -33,7 +33,7 @@ export const config = {
   },
   set privateKey(key: string | undefined) {
     runtimeConfig.privateKey = formatPrivateKey(key);
-  }
+  },
 };
 
 /**
@@ -51,13 +51,5 @@ export function getPrivateKeyAsHex(): Hex | undefined {
  * @param privateKey - The new private key to set
  */
 export function updatePrivateKey(privateKey: string): void {
-  console.error(`🔑 Received private key for update: "${privateKey}"`);
-  console.error(`🔑 Private key length: ${privateKey.length}`);
-  console.error(`🔑 Private key starts with 0x: ${privateKey.startsWith('0x')}`);
-  
   config.privateKey = privateKey;
-  
-  console.error(`🔑 After formatting: "${config.privateKey}"`);
-  console.error(`🔑 After formatting length: ${config.privateKey?.length}`);
-  console.error('Private key updated successfully');
 }

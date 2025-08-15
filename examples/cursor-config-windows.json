@@ -2,29 +2,26 @@
   "mcpServers": {
     "conflux-mcp-server": {
       "command": "node",
-      "args": ["./build/server/http-server.js"],
-      "cwd": "/path/to/conflux-mcp-server",
+      "args": ["./build/index.js"],
+      "cwd": "C:\\Users\\username\\Desktop\\conflux-mcp-server-main",
       "env": {
         "NODE_ENV": "development",
         "LOG_LEVEL": "debug",
-        "PORT": "3000",
         "PRIVATE_KEY": "your_private_key_here"
       }
     }
   },
   "notes": {
-    "unix_paths": "Use forward slashes: /home/user/project",
-    "windows_paths": "Use double backslashes: C:\\Users\\username\\Desktop\\project",
-    "windows_alt": "Or use forward slashes: C:/Users/username/Desktop/project",
+    "setup": "1. Replace 'username' with your actual Windows username",
+    "path_format": "Use double backslashes for Windows paths",
+    "alternative": "You can also use forward slashes: C:/Users/username/Desktop/project",
     "env_vars": "Environment variables are passed through the 'env' section",
     "private_key": "Add your Conflux private key for transfer tools to work",
-    "port": "Change PORT for HTTP server mode",
     "restart": "Restart Cursor after changing environment variables"
   },
   "environmentVariables": {
     "NODE_ENV": "development",
     "LOG_LEVEL": "debug",
-    "PORT": "3000",
     "PRIVATE_KEY": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
   }
 }

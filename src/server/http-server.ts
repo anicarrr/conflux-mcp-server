@@ -32,6 +32,8 @@ app.options('*', cors());
 
 // Keep track of active connections with session IDs
 const connections = new Map<string, SSEServerTransport>();
+// Map sessionId -> privateKey for per-session key isolation
+const sessionKeys = new Map<string, string>();
 
 let server: McpServer | null = null;
 startServer().then(s => {
@@ -59,6 +61,12 @@ startServer().then(s => {
     const sessionId = clientSessionId || generateSessionId();
     console.error(`Creating SSE session with ID: ${sessionId} (client provided: ${!!clientSessionId})`);
     
+    // Optional: update private key from header if provided
+    const headerKey = req.header('X-Private-Key');
+    if (headerKey && typeof headerKey === 'string' && headerKey.trim().length > 0) {
+      try { updatePrivateKey(headerKey.trim()); } catch {}
+    }
+
     // Set SSE headers
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache, no-transform");
@@ -71,11 +79,16 @@ startServer().then(s => {
       // Create and store the transport keyed by session ID
       const transport = new SSEServerTransport(`/messages?sessionId=${sessionId}`, res);
       connections.set(sessionId, transport);
+      // Save per-session private key if provided
+      if (headerKey && typeof headerKey === 'string' && headerKey.trim().length > 0) {
+        sessionKeys.set(sessionId, headerKey.trim());
+      }
       
       // Handle connection close
       req.on("close", () => {
         console.error(`SSE connection closed for session: ${sessionId}`);
         connections.delete(sessionId);
+        sessionKeys.delete(sessionId);
       });
       
       // Connect transport to server - this must happen before sending any data
@@ -102,6 +115,12 @@ startServer().then(s => {
     console.error(`Received MCP message request`);
     console.error(`Message body: ${JSON.stringify(req.body)}`);
     
+    // Optional: update private key from header if provided
+    const headerKey = req.header('X-Private-Key');
+    if (headerKey && typeof headerKey === 'string' && headerKey.trim().length > 0) {
+      try { updatePrivateKey(headerKey.trim()); } catch {}
+    }
+
     // Check for session ID in query parameters
     const sessionId = req.query.sessionId?.toString();
     console.error(`Session ID from query: ${sessionId}`);
@@ -142,9 +161,9 @@ startServer().then(s => {
                 result: {
                   protocolVersion: message.params.protocolVersion,
                   capabilities: {
-                    tools: {},
-                    resources: {},
-                    prompts: {}
+                    tools: { listChanged: true },
+                    resources: { listChanged: true },
+                    prompts: { listChanged: true }
                   },
                   serverInfo: {
                     name: "EVM-Server",
@@ -189,12 +208,17 @@ startServer().then(s => {
                return res.status(200).end();
              }
              
-             if (message.method === 'tools/call') {
+              if (message.method === 'tools/call') {
                console.error(`🔧 Handling tools/call for tool: ${message.params?.name}`);
                console.error(`   Arguments: ${JSON.stringify(message.params?.arguments, null, 2)}`);
                try {
                  const toolName = message.params.name;
-                 const toolArgs = message.params.arguments || {};
+                  const toolArgs = message.params.arguments || {};
+                  // Inject per-session private key if available
+                  const sessionKey = sessionId ? sessionKeys.get(sessionId) : undefined;
+                  if (sessionKey && typeof toolArgs === 'object' && toolArgs !== null) {
+                    (toolArgs as any).__privateKey = sessionKey;
+                  }
                  const toolHandler = getToolHandler(server, toolName);
                  if (!toolHandler || typeof toolHandler.callback !== 'function') {
                    const errorResponse = {
@@ -231,6 +255,60 @@ startServer().then(s => {
                  return res.status(200).end();
                }
              }
+
+              // prompts/list for SSE sessions
+              if (message.method === 'prompts/list') {
+                if (!server || !(server as any)._registeredPrompts) {
+                  const errorResponse = {
+                    jsonrpc: "2.0" as const,
+                    id: message.id,
+                    error: { code: -32000, message: "Server not initialized yet. Please try again in a moment." }
+                  };
+                  transport.send(errorResponse);
+                  return res.status(200).end();
+                }
+                // @ts-ignore access private property
+                const prompts = Object.entries((server as any)._registeredPrompts).map(([name, prompt]) => ({
+                  name,
+                  description: (prompt as any).description || "",
+                  inputSchema: (prompt as any).inputSchema
+                    ? zodToJsonSchema((prompt as any).inputSchema)
+                    : { type: "object", properties: {}, required: [] }
+                }));
+                const response = { jsonrpc: "2.0" as const, id: message.id, result: { prompts } };
+                transport.send(response);
+                return res.status(200).end();
+              }
+
+              // prompts/execute for SSE sessions
+              if (message.method === 'prompts/execute') {
+                try {
+                  const promptName = message.params.name;
+                  const promptArgs = message.params.arguments || {};
+                  const promptHandler = getPromptHandler(server, promptName);
+                  if (!promptHandler || typeof promptHandler.callback !== 'function') {
+                    const errorResponse = {
+                      jsonrpc: "2.0" as const,
+                      id: message.id,
+                      error: { code: -32601, message: `Prompt not found or invalid handler: ${promptName}` }
+                    };
+                    transport.send(errorResponse);
+                    return res.status(200).end();
+                  }
+                  const result = await promptHandler.callback(promptArgs);
+                  const response = { jsonrpc: "2.0" as const, id: message.id, result };
+                  transport.send(response);
+                  return res.status(200).end();
+                } catch (error) {
+                  const errorResponse = {
+                    jsonrpc: "2.0" as const,
+                    id: message.id,
+                    error: { code: -32603, message: `Error executing prompt: ${error}` }
+                  };
+                  transport.send(errorResponse);
+                  return res.status(200).end();
+                }
+              }
             
                        // Handle notifications/initialized (no response needed)
              if (message.method === 'notifications/initialized') {
@@ -269,9 +347,9 @@ startServer().then(s => {
           result: {
             protocolVersion: message.params.protocolVersion,
             capabilities: {
-              tools: {},
-              resources: {},
-              prompts: {}
+              tools: { listChanged: true },
+              resources: { listChanged: true },
+              prompts: { listChanged: true }
             },
             serverInfo: {
               name: "EVM-Server",
@@ -318,11 +396,67 @@ startServer().then(s => {
         return res.json(response);
       }
       
+      // Handle prompts/list method (for direct HTTP requests only)
+      if (message.method === 'prompts/list') {
+        console.error('Handling prompts/list request for direct HTTP');
+        if (!server || !(server as any)._registeredPrompts) {
+          const errorResponse = {
+            jsonrpc: "2.0",
+            id: message.id,
+            error: { code: -32000, message: "Server not initialized yet. Please try again in a moment." }
+          };
+          return res.json(errorResponse);
+        }
+        // @ts-ignore: Access private registry
+        const prompts = Object.entries((server as any)._registeredPrompts).map(([name, prompt]) => ({
+          name,
+          description: (prompt as any).description || "",
+          inputSchema: (prompt as any).inputSchema
+            ? zodToJsonSchema((prompt as any).inputSchema)
+            : { type: "object", properties: {}, required: [] }
+        }));
+        const response = { jsonrpc: "2.0", id: message.id, result: { prompts } };
+        return res.json(response);
+      }
+
+      // Handle prompts/execute method (for direct HTTP requests only)
+      if (message.method === 'prompts/execute') {
+        console.error(`Handling prompts/execute for prompt: ${message.params?.name}`);
+        try {
+          const promptName = message.params.name;
+          const promptArgs = message.params.arguments || {};
+          const promptHandler = getPromptHandler(server, promptName);
+          if (!promptHandler || typeof promptHandler.callback !== 'function') {
+            const errorResponse = {
+              jsonrpc: "2.0" as const,
+              id: message.id,
+              error: { code: -32601, message: `Prompt not found or invalid handler: ${promptName}` }
+            };
+            return res.json(errorResponse);
+          }
+          const result = await promptHandler.callback(promptArgs);
+          const response = { jsonrpc: "2.0" as const, id: message.id, result };
+          return res.json(response);
+        } catch (error) {
+          const errorResponse = {
+            jsonrpc: "2.0" as const,
+            id: message.id,
+            error: { code: -32603, message: `Error executing prompt: ${error}` }
+          };
+          return res.json(errorResponse);
+        }
+      }
+
       // Handle tools/call method (for direct HTTP requests only)
       if (message.method === 'tools/call') {
         console.error(`Handling tools/call request for tool: ${message.params.name}`);
         const toolName = message.params.name;
         const toolArgs = message.params.arguments || {};
+        // Inject per-session private key if available via query or header
+        const sessionKey = (req.query.sessionId && sessionKeys.get(String(req.query.sessionId))) || req.header('X-Private-Key');
+        if (sessionKey && typeof toolArgs === 'object' && toolArgs !== null) {
+          (toolArgs as any).__privateKey = String(sessionKey);
+        }
         try {
           const toolHandler = getToolHandler(server, toolName);
           if (!toolHandler || typeof toolHandler.callback !== 'function') {
@@ -410,7 +544,7 @@ startServer().then(s => {
     }
   });
 
-  // Handle MCP protocol at root endpoint (for StreamableHTTPClientTransport)
+      // Handle MCP protocol at root endpoint (for StreamableHTTPClientTransport)
   // @ts-ignore  
   app.post("/", async (req: Request, res: Response) => {
     // Delegate to the messages endpoint
@@ -471,6 +605,16 @@ function getToolHandler(server: any, toolName: string) {
   if (server && typeof server === 'object' && typeof toolName === 'string') {
     if (server._registeredTools && typeof server._registeredTools === 'object') {
       return server._registeredTools[toolName];
+    }
+  }
+  return undefined;
+}
+
+// Utility to access registered prompts from MCP server
+function getPromptHandler(server: any, promptName: string) {
+  if (server && typeof server === 'object' && typeof promptName === 'string') {
+    if ((server as any)._registeredPrompts && typeof (server as any)._registeredPrompts === 'object') {
+      return (server as any)._registeredPrompts[promptName];
     }
   }
   return undefined;

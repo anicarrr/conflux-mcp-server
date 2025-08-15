@@ -377,9 +377,9 @@ export function registerEVMTools(server: McpServer) {
       amount: z.string().describe("Amount to send in CFX (or the native token of the network), as a string (e.g., '0.1')"),
       network: z.string().optional().describe("Network name (e.g., 'conflux', 'conflux-testnet', 'conflux-devnet') or chain ID. Defaults to Conflux mainnet.")
     },
-    async ({ to, amount, network = DEFAULT_NETWORK }) => {
+    async ({ to, amount, network = DEFAULT_NETWORK, __privateKey }) => {
       try {
-        const txHash = await services.transferConflux(to, amount, network);
+        const txHash = await services.transferConflux(to, amount, network, __privateKey);
 
         return {
           content: [{
@@ -415,13 +415,14 @@ export function registerEVMTools(server: McpServer) {
       amount: z.string().describe("The amount of tokens to send (in token units, e.g., '10' for 10 tokens)"),
       network: z.string().optional().describe("Network name (e.g., 'conflux', 'conflux-testnet', 'conflux-devnet') or chain ID. Defaults to Conflux mainnet.")
     },
-    async ({ tokenAddress, toAddress, amount, network = DEFAULT_NETWORK }) => {
+    async ({ tokenAddress, toAddress, amount, network = DEFAULT_NETWORK, __privateKey }) => {
       try {
         const result = await services.transferERC20(
           tokenAddress,
           toAddress,
           amount,
-          network
+          network,
+          __privateKey
         );
 
         return {
@@ -460,13 +461,14 @@ export function registerEVMTools(server: McpServer) {
       amount: z.string().describe("The amount of tokens to approve in token units, not wei (e.g., '1000' to approve spending 1000 tokens). Use a very large number for unlimited approval."),
       network: z.string().optional().describe("Network name (e.g., 'conflux', 'conflux-testnet', 'conflux-devnet') or chain ID. Defaults to Conflux mainnet.")
     },
-    async ({ tokenAddress, spenderAddress, amount, network = DEFAULT_NETWORK }) => {
+    async ({ tokenAddress, spenderAddress, amount, network = DEFAULT_NETWORK, __privateKey }) => {
       try {
         const result = await services.approveERC20(
           tokenAddress,
           spenderAddress,
           amount,
-          network
+          network,
+          __privateKey
         );
 
         return {
@@ -505,13 +507,14 @@ export function registerEVMTools(server: McpServer) {
       toAddress: z.string().describe("The recipient wallet address that will receive the NFT"),
       network: z.string().optional().describe("Network name (e.g., 'conflux', 'conflux-testnet', 'conflux-devnet') or chain ID. Most NFTs are on Conflux mainnet, which is the default.")
     },
-    async ({ tokenAddress, tokenId, toAddress, network = DEFAULT_NETWORK }) => {
+    async ({ tokenAddress, tokenId, toAddress, network = DEFAULT_NETWORK, __privateKey }) => {
       try {
         const result = await services.transferERC721(
           tokenAddress,
           toAddress,
           BigInt(tokenId),
-          network
+          network,
+          __privateKey
         );
 
         return {
@@ -552,14 +555,15 @@ export function registerEVMTools(server: McpServer) {
       toAddress: z.string().describe("The recipient wallet address that will receive the tokens"),
       network: z.string().optional().describe("Network name (e.g., 'conflux', 'conflux-testnet', 'conflux-devnet') or chain ID. ERC1155 tokens exist across many networks. Defaults to Conflux mainnet.")
     },
-    async ({ tokenAddress, tokenId, amount, toAddress, network = DEFAULT_NETWORK }) => {
+    async ({ tokenAddress, tokenId, amount, toAddress, network = DEFAULT_NETWORK, __privateKey }) => {
       try {
         const result = await services.transferERC1155(
           tokenAddress,
           toAddress,
           BigInt(tokenId),
           amount,
-          network
+          network,
+          __privateKey
         );
 
         return {
@@ -689,7 +693,7 @@ export function registerEVMTools(server: McpServer) {
       args: z.array(z.any()).describe("The arguments to pass to the function, as an array (e.g., ['0x1234...', '1000000000000000000'])"),
       network: z.string().optional().describe("Network name (e.g., 'conflux', 'conflux-testnet', 'conflux-devnet') or chain ID. Defaults to Conflux mainnet.")
     },
-    async ({ contractAddress, abi, functionName, args, network = DEFAULT_NETWORK }) => {
+    async ({ contractAddress, abi, functionName, args, network = DEFAULT_NETWORK, __privateKey }) => {
       try {
         // Parse ABI if it's a string
         const parsedAbi = typeof abi === 'string' ? JSON.parse(abi) : abi;
@@ -703,7 +707,8 @@ export function registerEVMTools(server: McpServer) {
 
         const txHash = await services.writeContract(
           contractParams,
-          network
+          network,
+          __privateKey
         );
 
         return {

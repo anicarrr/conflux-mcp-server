@@ -110,7 +110,7 @@ docker run -d --name conflux-mcp-server -p 3333:3333 conflux-mcp-server:latest
 - `get_erc1155_balance` - Get ERC1155 token balance
 
 ### Transaction Operations
-- `transfer_native` - Transfer Conflux tokens
+- `transfer_conflux` - Transfer Conflux tokens
 - `transfer_erc20` - Transfer ERC20 tokens
 - `transfer_erc721` - Transfer NFTs
 - `transfer_erc1155` - Transfer ERC1155 tokens
@@ -120,23 +120,16 @@ docker run -d --name conflux-mcp-server -p 3333:3333 conflux-mcp-server:latest
 - `get_block_by_number` - Get specific block
 - `get_transaction` - Get transaction details
 - `get_transaction_receipt` - Get transaction receipt
-- `wait_for_transaction` - Wait for confirmation
 
 ### Smart Contracts
-- `call_contract` - Call contract functions
-- `deploy_contract` - Deploy new contracts
+- `read_contract` - Call view/pure contract functions
+- `write_contract` - Execute state-changing contract functions
 - `is_contract` - Check if address is contract
-- `get_code` - Get contract bytecode
-- `get_storage_at` - Read contract storage
 
 ### Gas & Fees
 - `estimate_gas` - Estimate transaction gas
-- `get_gas_price` - Get current gas price
-- `get_nonce` - Get account nonce
 
 ### Advanced
-- `get_logs` - Get contract event logs
-- `simulate_transaction` - Simulate without executing
 - `get_address_from_private_key` - Derive address from key
 
 ## 🌐 Supported Networks

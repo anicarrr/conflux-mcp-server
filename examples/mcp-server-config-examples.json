@@ -1,0 +1,166 @@
+{
+  "mcpServers": {
+    "conflux-mcp-server-stdio": {
+      "command": "node",
+      "args": ["./build/index.js"],
+      "cwd": "/path/to/conflux-mcp-server",
+      "env": {
+        "NODE_ENV": "development",
+        "LOG_LEVEL": "debug"
+      }
+    },
+    "conflux-mcp-server-stdio-bun": {
+      "command": "bun",
+      "args": ["./build/index.js"],
+      "cwd": "/path/to/conflux-mcp-server",
+      "env": {
+        "NODE_ENV": "development",
+        "LOG_LEVEL": "debug"
+      }
+    },
+    "conflux-mcp-server-stdio-ts": {
+      "command": "bun",
+      "args": ["./src/index.ts"],
+      "cwd": "/path/to/conflux-mcp-server",
+      "env": {
+        "NODE_ENV": "development",
+        "LOG_LEVEL": "debug"
+      }
+    },
+    "conflux-mcp-server-http": {
+      "command": "node",
+      "args": ["./build/server/http-server.js"],
+      "cwd": "/path/to/conflux-mcp-server",
+      "env": {
+        "NODE_ENV": "development",
+        "LOG_LEVEL": "debug",
+        "PORT": "3000"
+      }
+    },
+    "conflux-mcp-server-http-bun": {
+      "command": "bun",
+      "args": ["./build/server/http-server.js"],
+      "cwd": "/path/to/conflux-mcp-server",
+      "env": {
+        "NODE_ENV": "development",
+        "LOG_LEVEL": "debug",
+        "PORT": "3000"
+      }
+    }
+  },
+  "deploymentMethods": {
+    "stdio": {
+      "description": "Direct process communication via stdin/stdout",
+      "advantages": [
+        "Fastest communication",
+        "No network overhead",
+        "Secure (no external access)",
+        "Simple setup"
+      ],
+      "disadvantages": [
+        "Single client only",
+        "Must be on same machine",
+        "Process management required"
+      ],
+      "useCase": "Local development, single user, maximum performance"
+    },
+    "http": {
+      "description": "HTTP server with REST API endpoints",
+      "advantages": [
+        "Multiple clients can connect",
+        "Network accessible",
+        "Standard HTTP protocol",
+        "Easy to debug with tools like curl"
+      ],
+      "disadvantages": [
+        "Network overhead",
+        "Security considerations",
+        "More complex setup"
+      ],
+      "useCase": "Multiple clients, remote access, API integration"
+    }
+  },
+  "setupInstructions": {
+    "localDevelopment": {
+      "steps": [
+        "1. Clone the repository",
+        "2. Run 'bun install' to install dependencies",
+        "3. Run 'bun run build' to build the project",
+        "4. Copy the appropriate config to .cursor-config.json",
+        "5. Update the 'cwd' path to your actual project directory"
+      ],
+      "notes": "Use stdio mode for fastest development experience"
+    },
+    "production": {
+      "steps": [
+        "1. Build the project with 'bun run build'",
+        "2. Use HTTP server mode for multiple clients",
+        "3. Set appropriate environment variables",
+        "4. Consider using PM2 or similar for process management"
+      ],
+      "notes": "HTTP mode recommended for production deployments"
+    }
+  },
+  "environmentVariables": {
+    "NODE_ENV": {
+      "values": ["development", "production", "test"],
+      "default": "development",
+      "description": "Sets the environment mode"
+    },
+    "LOG_LEVEL": {
+      "values": ["error", "warn", "info", "debug"],
+      "default": "info",
+      "description": "Sets the logging verbosity"
+    },
+    "PORT": {
+      "default": "3000",
+      "description": "HTTP server port (only for HTTP mode)"
+    },
+    "PRIVATE_KEY": {
+      "description": "Your Conflux private key for transactions (optional)",
+      "warning": "Never commit this to version control!"
+    }
+  },
+  "npxUsage": {
+    "description": "To use npx, the package must be published to npm first",
+    "currentStatus": "Package is not published to npm yet",
+    "publishingSteps": [
+      "1. Update package.json with proper name and version",
+      "2. Run 'npm login' to authenticate",
+      "3. Run 'npm publish' to publish to npm registry",
+      "4. Users can then run 'npx @your-org/conflux-mcp-server'"
+    ],
+    "alternative": "Use local build or HTTP server mode instead"
+  },
+  "examples": {
+    "cursorConfig": {
+      "description": "Copy this to .cursor-config.json in your project root",
+      "note": "Replace '/path/to/conflux-mcp-server' with your actual project path"
+    },
+    "httpServer": {
+      "description": "Start HTTP server manually",
+      "command": "bun run build && node ./build/server/http-server.js"
+    },
+    "stdioMode": {
+      "description": "Start stdio mode manually",
+      "command": "bun run build && node ./build/index.js"
+    }
+  },
+  "troubleshooting": {
+    "commonIssues": {
+      "buildFailed": "Run 'bun install' first, then 'bun run build'",
+      "pathNotFound": "Update 'cwd' in config to match your actual project path",
+      "permissionDenied": "Ensure the build files have execute permissions",
+      "portInUse": "Change PORT environment variable or kill existing process"
+    },
+    "debugMode": {
+      "description": "Set LOG_LEVEL=debug for verbose logging",
+      "note": "Helpful for troubleshooting connection issues"
+    }
+  },
+  "networks": {
+    "supported": ["conflux", "conflux-testnet"],
+    "default": "conflux",
+    "description": "The server supports both mainnet and testnet"
+  }
+}
