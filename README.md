@@ -57,9 +57,9 @@ docker-compose up -d
 docker run -d --name conflux-mcp-server -p 3333:3333 conflux-mcp-server:latest
 ```
 
-## 🔧 MCP Client Configuration
+## 🔧 MCP Client Configuration Examples
 
-### For Cursor IDE
+### Docker - stdio
 
 ```json
 {
@@ -81,7 +81,7 @@ docker run -d --name conflux-mcp-server -p 3333:3333 conflux-mcp-server:latest
 }
 ```
 
-### For Claude Desktop
+### HTTP - sse
 
 ```json
 {
